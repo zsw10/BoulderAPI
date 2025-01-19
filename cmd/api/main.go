@@ -10,8 +10,11 @@ import (
 )
 
 type config struct {
-	port int
-	db   struct {
+	port    int
+	boulder struct {
+		url string
+	}
+	db struct {
 		file         string
 		maxOpenConns int
 		maxIdleConns int
@@ -34,6 +37,7 @@ func main() {
 	var cfg config
 	flag.IntVar(&cfg.port, "port", 4000, "API server port")
 	flag.Parse()
+	cfg.boulder.url = "http://localhost:4001/directory"
 
 	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 
