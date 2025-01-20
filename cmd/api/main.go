@@ -9,6 +9,7 @@ import (
 	"os"
 	"time"
 
+	_ "github.com/mattn/go-sqlite3"
 	"github.com/zsw10/BoulderAPI/internal/data"
 )
 
@@ -39,7 +40,7 @@ func main() {
 
 	flag.IntVar(&cfg.port, "port", 4000, "API server port")
 	flag.StringVar(&cfg.boulder.url, "boulderURL", "http://localhost:4001/directory", "boudler CA URL")
-	flag.StringVar(&cfg.db.file, "db-file", "./test.db", "Sqlite DB file")
+	flag.StringVar(&cfg.db.file, "db-file", "./testDB.db", "Sqlite DB file")
 	flag.Parse()
 
 	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))

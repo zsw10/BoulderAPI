@@ -50,14 +50,15 @@ func (app *application) createAccountHandler(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	user.CreatedAt = time.Now()
-	user.Status = reg.Body.Status
 	id, err := strconv.Atoi(path.Base(reg.URI))
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 		return
 	}
+
 	user.ID = id
+	user.CreatedAt = time.Now()
+	user.Status = reg.Body.Status
 
 	err = app.models.User.Insert(&user)
 
