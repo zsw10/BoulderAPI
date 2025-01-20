@@ -1,37 +1,23 @@
 package main
 
 import (
-	"crypto"
 	"net/http"
+	"path"
+	"strconv"
 	"time"
 
 	"github.com/go-acme/lego/v4/certcrypto"
 	"github.com/go-acme/lego/v4/lego"
 	"github.com/go-acme/lego/v4/registration"
+	"github.com/zsw10/BoulderAPI/internal/data"
 )
 
-type User struct {
-	Email         string
-	Resgistration *registration.Resource
-	key           crypto.PrivateKey
-}
-
-func (u *User) GetEmail() string {
-	return u.Email
-}
-
-func (u User) GetRegistration() *registration.Resource {
-	return u.Resgistration
-}
-
-func (u *User) GetPrivateKey() crypto.PrivateKey {
-	return u.key
-}
-
 func (app *application) createAccountHandler(w http.ResponseWriter, r *http.Request) {
-	var user User
+	var input struct {
+		Email string
+	}
 
-	err := app.readJSON(w, r, user.Email)
+	err := app.readJSON(w, r, &input)
 	if err != nil {
 		app.badRequestResponse(w, r, err)
 		return
@@ -43,7 +29,10 @@ func (app *application) createAccountHandler(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	user.key = privateKey
+	user := data.User{
+		Email: input.Email,
+		Key:   privateKey,
+	}
 
 	config := lego.NewConfig(&user)
 	config.CADirURL = app.config.boulder.url
@@ -61,9 +50,18 @@ func (app *application) createAccountHandler(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	user.Resgistration = reg
+	user.CreatedAt = time.Now()
+	user.Status = reg.Body.Status
+	id, err := strconv.Atoi(path.Base(reg.URI))
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+		return
+	}
+	user.ID = id
 
-	res := envelope{"AccountID": reg.URI, "Status": "registered", "CreatedAt": time.Now().Format(time.RFC3339)}
+	err = app.models.User.Insert(&user)
+
+	res := envelope{"AccountID": user.ID, "Status": user.Status, "CreatedAt": user.CreatedAt.Format(time.RFC3339)}
 
 	err = app.writeJSON(w, http.StatusCreated, res, nil)
 	if err != nil {
