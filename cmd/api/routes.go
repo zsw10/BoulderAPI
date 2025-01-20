@@ -14,5 +14,5 @@ func (app *application) routes() http.Handler {
 
 	router.HandlerFunc(http.MethodPost, "/account", app.createAccountHandler)
 
-	return router
+	return app.recoverPanic(app.rateLimit(router))
 }

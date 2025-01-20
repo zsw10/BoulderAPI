@@ -3,11 +3,9 @@ package main
 import (
 	"database/sql"
 	"flag"
-	"fmt"
 	"log/slog"
-	"net/http"
 	"os"
-	"time"
+	"sync"
 
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/zsw10/BoulderAPI/internal/data"
@@ -33,6 +31,7 @@ type application struct {
 	config config
 	logger *slog.Logger
 	models data.Models
+	wg     sync.WaitGroup
 }
 
 func main() {
@@ -56,23 +55,17 @@ func main() {
 	}
 	defer db.Close()
 
+	logger.Info("database connection pool established")
+
 	app := &application{
 		config: cfg,
 		logger: logger,
 		models: data.NewModels(db),
 	}
 
-	srv := &http.Server{
-		Addr:         fmt.Sprintf(":%d", cfg.port),
-		Handler:      app.routes(),
-		IdleTimeout:  time.Minute,
-		ReadTimeout:  10 * time.Second,
-		WriteTimeout: 10 * time.Second,
-		ErrorLog:     slog.NewLogLogger(logger.Handler(), slog.LevelError),
+	err = app.serve()
+	if err != nil {
+		logger.Error(err.Error())
+		os.Exit(1)
 	}
-
-	logger.Info("starting server", "addr", srv.Addr)
-	err = srv.ListenAndServe()
-	logger.Error(err.Error())
-	os.Exit(1)
 }
