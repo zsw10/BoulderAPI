@@ -50,7 +50,7 @@ func (m UserModel) Insert(user *User) error {
 	})
 
 	query := `
-	INSERT INTO users (id, created_at, email, key, status)
+	INSERT INTO USERS (id, created_at, email, key, status)
 	VALUES ($1, $2, $3, $4, $5)`
 
 	args := []any{user.ID, user.CreatedAt, user.Email, pKeyPEM, user.Status}
@@ -69,7 +69,7 @@ func (m UserModel) Insert(user *User) error {
 func (m UserModel) GetByID(id int) (*User, error) {
 	query := `
 	SELECT id, created_at, email, key, status
-	FROM users
+	FROM USERS
 	WHERE id = $1`
 
 	var user User

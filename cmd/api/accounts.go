@@ -61,6 +61,10 @@ func (app *application) createAccountHandler(w http.ResponseWriter, r *http.Requ
 	user.Status = reg.Body.Status
 
 	err = app.models.User.Insert(&user)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+		return
+	}
 
 	res := envelope{"AccountID": user.ID, "Status": user.Status, "CreatedAt": user.CreatedAt.Format(time.RFC3339)}
 
@@ -69,4 +73,6 @@ func (app *application) createAccountHandler(w http.ResponseWriter, r *http.Requ
 		app.serverErrorResponse(w, r, err)
 		return
 	}
+
+	app.logger.Info("Account registered successfully")
 }
