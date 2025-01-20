@@ -18,4 +18,4 @@ start-api:
 
 .PHONY: stop-api
 stop-api:
-	pkill -SIGKILL api
+	pkill -SIGTERM api
