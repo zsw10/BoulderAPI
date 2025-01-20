@@ -12,7 +12,7 @@ func (app *application) routes() http.Handler {
 	router.NotFound = http.HandlerFunc(app.notFoundResponse)
 	router.MethodNotAllowed = http.HandlerFunc(app.notAllowedResponse)
 
-	router.HandlerFunc(http.MethodPost, "account", app.createAccountHandler)
+	router.HandlerFunc(http.MethodPost, "/account", app.createAccountHandler)
 
 	return router
 }
