@@ -23,7 +23,7 @@ type config struct {
 	}
 
 	limiter struct {
-		rps     int
+		rps     float64
 		burst   int
 		enabled bool
 	}
@@ -41,6 +41,10 @@ func main() {
 	flag.IntVar(&cfg.port, "port", 4000, "API server port")
 	flag.StringVar(&cfg.boulder.url, "boulderURL", "http://localhost:4001/directory", "boudler CA URL")
 	flag.StringVar(&cfg.db.file, "db-file", "./testDB.db", "Sqlite DB file")
+
+	flag.Float64Var(&cfg.limiter.rps, "limiter-rps", 2, "Rate limiter maximum requests per second")
+	flag.IntVar(&cfg.limiter.burst, "limiter-burst", 4, "Rate limiter maximum burst")
+	flag.BoolVar(&cfg.limiter.enabled, "limiter-enabled", true, "Enable rate limiter")
 	flag.Parse()
 
 	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
